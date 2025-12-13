@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+
+# uv / venv
+.venv/
+
+# macOS
+.DS_Store
+
+# Cursor
+.cursorrules
+
+# Backups
+pyproject.toml.save
+
+# Caches / generated DB
+hf_cache/
+chroma_db/
+
+# Data (raw + generated)
+data/raw/
+data/markdown/
+data/chunks/
+data/raft/
+
+# Secrets
+.env
+.env.*
+
+# Large model artifacts
+*.gguf
+*.pt
+*.safetensors
+*.bin
