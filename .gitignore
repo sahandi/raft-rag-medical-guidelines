@@ -33,3 +33,11 @@ data/raft/
 *.pt
 *.safetensors
 *.bin
+data/raft/
+data/chunks/
+data/markdown/
+data/raw/
+chroma_db/
+hf_cache/
+.env
+.venv/
