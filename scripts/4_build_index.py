@@ -45,7 +45,7 @@ def build_indexes():
     tokenized = [t.split() for t in texts]
     bm25 = BM25Okapi(tokenized)
 
-    bm25_path = PROJECT_ROOT / "data" / "bm25_index.json"
+    bm25_path = PROJECT_ROOT / "data" / "bm25_texts.json"
     with bm25_path.open("w", encoding="utf-8") as f:
         json.dump({
             "texts": texts,
