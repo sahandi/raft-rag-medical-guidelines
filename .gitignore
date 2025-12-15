@@ -33,11 +33,25 @@ data/raft/
 *.pt
 *.safetensors
 *.bin
-data/raft/
-data/chunks/
-data/markdown/
-data/raw/
-chroma_db/
-hf_cache/
-.env
-.venv/
+
+# Derived retrieval artifacts
+data/bm25_texts.json
+data/bm25_index.json
+
+# Local fine-tuning artifacts (do not commit)
+raft_lora_adapter/
+merged_model_16bit/
+
+# Downloaded archives
+*.zip
+
+# Training outputs / logs
+outputs/
+wandb/
+logs/
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+backup.bundle
