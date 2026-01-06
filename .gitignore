@@ -19,10 +19,23 @@ hf_cache/
 chroma_db/
 
 # Data (raw + generated)
-data/raw/
-data/markdown/
-data/chunks/
-data/raft/
+# Ignore everything in data/ by default
+data/**
+
+# Allowlist only small reproducible inputs/docs
+!data/
+!data/raw/
+!data/README.md
+!data/raw/manifest.csv
+!data/eval/
+!data/eval/raw/
+!data/eval/raw/questions.txt
+!data/eval/frozen_sources.jsonl
+!data/eval/frozen_contexts.jsonl
+
+# Still ignore outputs
+data/eval/out/
+
 
 # Secrets
 .env
@@ -51,7 +64,6 @@ wandb/
 logs/
 
 # Notebooks
-*.ipynb
 .ipynb_checkpoints/
 
 backup.bundle
