@@ -1,0 +1,8 @@
+docling[ocr]
+chromadb
+sentence-transformers
+rank_bm25
+openai
+streamlit
+pandas
+
