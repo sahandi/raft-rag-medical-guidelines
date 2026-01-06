@@ -36,7 +36,6 @@ data/**
 # Still ignore outputs
 data/eval/out/
 
-
 # Secrets
 .env
 .env.*
@@ -67,3 +66,6 @@ logs/
 .ipynb_checkpoints/
 
 backup.bundle
+
+# Local experiment outputs (do not commit)
+artifacts/
