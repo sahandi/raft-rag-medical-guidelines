@@ -1,7 +1,7 @@
 from pathlib import Path
 from docling.document_converter import DocumentConverter
 
-PROJECT_ROOT = Path("/Volumes/AD/Rima/RAFT_Project")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PDF_DIR = PROJECT_ROOT / "data" / "raw"
 MD_DIR = PROJECT_ROOT / "data" / "markdown"
 

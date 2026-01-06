@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 from openai import OpenAI
 
-PROJECT_ROOT = Path("/Volumes/AD/Rima/RAFT_Project")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CHUNKS_PATH = PROJECT_ROOT / "data" / "chunks" / "chunks.jsonl"
 RAFT_PATH = PROJECT_ROOT / "data" / "raft" / "raft.jsonl"
 

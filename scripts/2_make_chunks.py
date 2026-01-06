@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 
-PROJECT_ROOT = Path("/Volumes/AD/Rima/RAFT_Project")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MD_DIR = PROJECT_ROOT / "data" / "markdown"
 CHUNKS_PATH = PROJECT_ROOT / "data" / "chunks" / "chunks.jsonl"
 

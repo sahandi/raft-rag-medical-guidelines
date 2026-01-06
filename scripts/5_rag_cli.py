@@ -1,25 +1,27 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
 import chromadb
+from openai import OpenAI
 from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
-from openai import OpenAI
 
 # -----------------------------
 # Config
 # -----------------------------
-PROJECT_ROOT = Path("/Volumes/AD/Rima/RAFT_Project")
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CHROMA_DIR = PROJECT_ROOT / "chroma_db"
 CHUNKS_PATH = PROJECT_ROOT / "data" / "chunks" / "chunks.jsonl"
 
-LMSTUDIO_BASE_URL = "http://localhost:1234/v1"
-MODEL_NAME = "qwen2.5-0.5b-instruct"  # <-- change this
+LMSTUDIO_BASE_URL = "http://127.0.0.1:1234/v1"
+MODEL_NAME = os.getenv("LMSTUDIO_MODEL", "qwen2.5-0.5b-instruct")
 
 TOP_K_SEM = 4
 TOP_K_BM25 = 4
@@ -55,14 +57,9 @@ def open_chroma_collection():
     client = chromadb.PersistentClient(path=str(CHROMA_DIR))
     return client.get_or_create_collection("guidelines")
 
-def rrf_fusion(
-    sem_ids: List[str],
-    bm25_ids: List[str],
-    k: int = 60
-) -> Dict[str, float]:
+def rrf_fusion(sem_ids: List[str], bm25_ids: List[str], k: int = 60) -> Dict[str, float]:
     """
-    Reciprocal Rank Fusion:
-    score(doc) = sum(1 / (k + rank))
+    Reciprocal Rank Fusion: score(doc) = sum(1 / (k + rank))
     """
     scores: Dict[str, float] = {}
     for rank, doc_id in enumerate(sem_ids, start=1):
@@ -100,15 +97,17 @@ def hybrid_retrieve(
     by_id = {c.id: c for c in chunks}
     return [by_id[i] for i in ranked_ids if i in by_id]
 
+
 def build_prompt(question: str, contexts: List[Chunk]) -> str:
     # Label sources so the model can cite them.
     source_blocks = []
     for i, c in enumerate(contexts, start=1):
         source_blocks.append(
             f"[S{i}] pdf={c.pdf_name} chunk_id={c.id}\n{c.text}"
+
+
         )
     sources_text = "\n\n---\n\n".join(source_blocks)
-
     return f"""You are a medical document QA assistant.
 
 RULES:
@@ -152,7 +151,9 @@ def main():
     print("Building BM25 (in-memory)...")
     bm25 = build_bm25(chunks)
 
+    print(f"\n✅ Using model: {MODEL_NAME}")
     print("\n✅ Ready. Type questions. Type 'exit' to quit.")
+
     while True:
         q = input("\nQuestion> ").strip()
         if q.lower() in {"exit", "quit"}:
@@ -173,4 +174,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

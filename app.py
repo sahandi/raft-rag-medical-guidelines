@@ -12,7 +12,7 @@ from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 
-PROJECT_ROOT = Path("/Volumes/AD/Rima/RAFT_Project")
+PROJECT_ROOT = Path(__file__).resolve().parent
 CHROMA_DIR = PROJECT_ROOT / "chroma_db"
 CHUNKS_PATH = PROJECT_ROOT / "data" / "chunks" / "chunks.jsonl"
 

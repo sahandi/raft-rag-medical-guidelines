@@ -2,7 +2,7 @@ import json
 import re
 from pathlib import Path
 
-PROJECT_ROOT = Path("/Volumes/AD/Rima/RAFT_Project")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAFT_IN = PROJECT_ROOT / "data" / "raft" / "raft.jsonl"
 RAFT_OUT = PROJECT_ROOT / "data" / "raft" / "raft_clean.jsonl"
 
