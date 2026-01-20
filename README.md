@@ -1,4 +1,4 @@
-````md
+
 # RAFT + RAG on Medical Guidelines (Local, macOS)
 
 End-to-end **document RAG** over medical guideline PDFs (OCR → chunks → hybrid retrieval → cited answers), plus a **controlled evaluation harness** that compares systems using the **same frozen evidence** (frozen chunk IDs / contexts). RAFT fine-tuning is included as an experiment.
