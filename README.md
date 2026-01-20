@@ -22,7 +22,7 @@ It also includes an **experimental RAFT (Retrieval-Augmented Fine-Tuning)** LoRA
   - CLI (terminal)
   - Streamlit UI (browser)
 
-### Evaluation harness (mentor-friendly)
+### Evaluation harness
 - “Frozen contexts” evaluation:
   - Freeze which chunks are used per question
   - Run multiple models against the **same evidence**
