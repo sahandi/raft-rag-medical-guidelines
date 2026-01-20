@@ -100,8 +100,8 @@ SOURCES:
 """
 
 def main():
-    st.set_page_config(page_title="RAFT Medical RAG", layout="wide")
-    st.title("🧬 RAFT Medical RAG (Hybrid Retrieval + LM Studio)")
+    st.set_page_config(page_title="Base + RAG Medical RAG", layout="wide")
+    st.title("🧬 Base + RAG Medical RAG (Hybrid Retrieval + LM Studio)")
 
     chunks, by_id, collection, embedder, bm25, lm_client = load_resources()
 
