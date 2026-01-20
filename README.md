@@ -10,7 +10,7 @@ End-to-end **document RAG** over medical guideline PDFs (OCR → chunks → hybr
 Run:
 ```bash
 uv run streamlit run app.py
-````
+
 
 What you’ll see:
 
