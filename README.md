@@ -5,7 +5,7 @@ End-to-end **document RAG** over medical guideline PDFs (OCR → chunks → hybr
 
 ## Demo (Streamlit)
 
-![Demo](docs/demo.gif)
+<img src="docs/demo.gif" width="900" />
 
 Run:
 ```bash
