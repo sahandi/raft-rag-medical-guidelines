@@ -189,5 +189,4 @@ Output (ignored by git):
 * If LM Studio connection fails, confirm the server is running at `http://127.0.0.1:1234/v1`.
 
 </details>
-```
-::contentReference[oaicite:0]{index=0}
+
