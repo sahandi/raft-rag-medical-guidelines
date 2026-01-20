@@ -4,12 +4,12 @@ End-to-end **document RAG** over medical guideline PDFs (OCR → chunks → hybr
 
 ## Demo (Streamlit)
 
-![Demo](docs/demo.gif)
+![Demo](docs/demo.gif?raw=1)
 
 Run:
 ```bash
 uv run streamlit run app.py
-
+```
 
 
 What you’ll see:
