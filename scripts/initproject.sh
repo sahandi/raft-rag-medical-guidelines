@@ -33,7 +33,8 @@ if ! command -v tesseract >/dev/null 2>&1; then
 fi
 
 # 5) Create venv (Python 3.11)
-uv venv --python 3.11
+UV_VENV_CLEAR=1 uv venv --python 3.11
+
 
 # 6) Install Python deps (uv project: pyproject.toml + uv.lock)
 if [ -f pyproject.toml ]; then
