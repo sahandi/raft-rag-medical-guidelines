@@ -33,14 +33,15 @@ if ! command -v tesseract >/dev/null 2>&1; then
 fi
 
 # 5) Create venv (Python 3.11)
-uv venv --python 3.11
+UV_VENV_CLEAR=1 uv venv --python 3.11
 
-# 6) Install Python deps
-if [ -f requirements.txt ]; then
-  uv pip install -r requirements.txt
+
+# 6) Install Python deps (uv project: pyproject.toml + uv.lock)
+if [ -f pyproject.toml ]; then
+  uv sync
 else
-  echo "ERROR: requirements.txt missing."
-  echo "Create it (clean): docling[ocr], chromadb, sentence-transformers, rank_bm25, openai, streamlit, pandas"
+  echo "ERROR: pyproject.toml missing."
+  echo "This repo uses uv project deps (pyproject.toml + uv.lock)."
   exit 1
 fi
 

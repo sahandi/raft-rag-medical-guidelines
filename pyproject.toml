@@ -1,7 +1,14 @@
 [project]
 name = "raft-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "RAFT + Hybrid RAG over medical guideline PDFs with frozen-context evaluation + SOTA comparison."
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
-dependencies = []
+dependencies = [  
+  "docling[ocr]",
+  "chromadb",
+  "sentence-transformers",
+  "rank-bm25",
+  "openai",
+  "streamlit",
+  "pandas",]
