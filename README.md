@@ -19,18 +19,25 @@ What you’ll see:
 * The answer is generated from retrieved chunks
 * Sources appear as `pdf=` + `chunk_id=` citations
 
-## Results (10-question eval)
+## Results (10-question internal eval, manually scored)
 
-| System                               | Correct | Grounded | Notes                                 |
-| ------------------------------------ | ------: | -------: | ------------------------------------- |
-| Base + RAG (local, hybrid retrieval) |    9/10 |     9/10 | Strong baseline                       |
-| RAFT + RAG (fine-tuned experiment)   |    2/10 |     3/10 | Underperformed in initial small run   |
-| SOTA (OpenAI) on frozen contexts     |   10/10 |    10/10 | Controlled comparison (same evidence) |
+> These results come from a **small 10-question internal evaluation** under a specific local setup (LM Studio + hybrid retrieval for local models).  
+> Scores are useful for comparison, but they are **not a benchmark claim**. In spot-checks, failures can still occur (especially on table-heavy PDF chunks where PDF→Markdown extraction is noisy).
+
+| System                                             | Correct | Grounded | Notes |
+| -------------------------------------------------- | ------: | -------: | ----- |
+| Base + RAG (local, hybrid retrieval; end-to-end)   |    9/10 |     9/10 | Strong baseline in this small eval |
+| RAFT + RAG (fine-tuned experiment; end-to-end)     |    2/10 |     3/10 | Underperformed in initial small run |
+| SOTA (OpenAI) on frozen contexts (controlled eval) |   10/10 |    10/10 | Same evidence (frozen contexts) for all answers |
 
 Rubric:
 
 * **Correct (0/1):** answers the question correctly
 * **Grounded (0/1):** answer is supported by the provided evidence and citations match
+
+### Notes on evaluation setup
+- **Base + RAG / RAFT + RAG** rows are **end-to-end** (retrieval + generation).
+- **SOTA (OpenAI)** row is a **controlled generation comparison** on **frozen contexts** (same evidence chunks), which isolates answer faithfulness from retrieval differences.
 
 ## Docs
 
