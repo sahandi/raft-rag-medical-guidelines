@@ -23,10 +23,10 @@ CHUNKS_PATH = PROJECT_ROOT / "data" / "chunks" / "chunks.jsonl"
 LMSTUDIO_BASE_URL = "http://127.0.0.1:1234/v1"
 MODEL_NAME = os.getenv("LMSTUDIO_MODEL", "qwen2.5-0.5b-instruct")
 
-# LM Studio server model ids look like "qwen2.5-0.5b-raft" (no .gguf).
-# If someone passes a .gguf filename, strip the extension.
-if MODEL_NAME.endswith(".gguf"):
-    MODEL_NAME = MODEL_NAME[:-5]  # remove ".gguf"
+# LM Studio model ids usually look like "qwen2.5-0.5b-raft" (no .gguf).
+# If someone passes a .gguf filename, strip the extension for robustness.
+if MODEL_NAME.lower().endswith(".gguf"):
+    MODEL_NAME = MODEL_NAME[:-5]
 
 TOP_K_SEM = 4
 TOP_K_BM25 = 4

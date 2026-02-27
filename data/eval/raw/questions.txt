@@ -1,10 +1,10 @@
-1.According to the Diabetes Canada Quick Reference Guide, what A1C (%) range is classified as prediabetes, and what A1C (%) threshold is classified as diabetes?  
-2. In the same guide, what FPG (mmol/L) range is impaired fasting glucose (IFG), and what FPG (mmol/L) threshold is diabetes?
+1. According to the Diabetes Canada Quick Reference Guide, what A1C (%) range is classified as prediabetes, and what A1C (%) threshold is classified as diabetes?
+2. According to the Diabetes Canada Quick Reference Guide, what FPG (mmol/L) range is impaired fasting glucose (IFG), and what FPG (mmol/L) threshold is diabetes?
 3. For screening, according to the Management-of-type-2-diabetes guideline, how often should asymptomatic adults at high risk be screened, and how often should people with IGT/IFG be screened?
 4. In an asymptomatic person, how many results in the diabetes range are needed to confirm the diagnosis, according to the Diabetes Canada Quick Reference Guide?
 5. For “most people with diabetes,” what are the fasting/preprandial and 2-hour postprandial blood glucose targets (mmol/L) in the Diabetes Canada Quick Reference Guide?
 6. In NICE NG28, what is the recommendation about structured education for adults with type 2 diabetes (when it should be offered, and whether it should be reinforced/reviewed)?
-7.  In NICE NG28, what is the first-line drug treatment recommended for adults with type 2 diabetes?
+7. In NICE NG28, what is the first-line drug treatment recommended for adults with type 2 diabetes?
 8. In the WHO guideline, what is the recommended second-line treatment if a patient does not achieve glycaemic control with metformin alone (or can’t take metformin)?
-9.  In the WHO guideline, which sulfonylurea should be avoided in patients aged 60 years and older, and what alternative is preferred when hypoglycaemia is a concern?
-10. In the IDF 2025 recommendations, what are the proposed SMBG targets for (a) fasting/pre-prandial glucose and (b) postprandial glucose, and **when** should postprandial glucose be measured? 
+9. In the WHO guideline, which sulfonylurea should be avoided in patients aged 60 years and older, and what alternative is preferred when hypoglycaemia is a concern?
+10. In the IDF 2025 recommendations, what are the proposed SMBG targets for (a) fasting/pre-prandial glucose and (b) postprandial glucose, and when should postprandial glucose be measured?
