@@ -23,6 +23,11 @@ CHUNKS_PATH = PROJECT_ROOT / "data" / "chunks" / "chunks.jsonl"
 LMSTUDIO_BASE_URL = "http://127.0.0.1:1234/v1"
 MODEL_NAME = os.getenv("LMSTUDIO_MODEL", "qwen2.5-0.5b-instruct")
 
+# LM Studio server model ids look like "qwen2.5-0.5b-raft" (no .gguf).
+# If someone passes a .gguf filename, strip the extension.
+if MODEL_NAME.endswith(".gguf"):
+    MODEL_NAME = MODEL_NAME[:-5]  # remove ".gguf"
+
 TOP_K_SEM = 4
 TOP_K_BM25 = 4
 FINAL_CONTEXT_K = 4  # how many chunks we actually feed to the model
@@ -128,7 +133,9 @@ def ask_lmstudio(prompt: str) -> str:
     resp = lm_client.chat.completions.create(
         model=MODEL_NAME,
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,
+        temperature=0.0,
+        max_tokens=80,
+
     )
     return resp.choices[0].message.content
 
