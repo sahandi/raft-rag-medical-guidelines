@@ -9,6 +9,7 @@ from typing import List, Dict
 
 import chromadb
 from openai import OpenAI
+from openai import APIConnectionError, APIError
 from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
 
@@ -129,15 +130,21 @@ SOURCES:
 """
 
 def ask_lmstudio(prompt: str) -> str:
-    lm_client = OpenAI(base_url=LMSTUDIO_BASE_URL, api_key="lm-studio")
-    resp = lm_client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.0,
-        max_tokens=80,
-
-    )
-    return resp.choices[0].message.content
+    try:
+        lm_client = OpenAI(base_url=LMSTUDIO_BASE_URL, api_key="lm-studio")
+        resp = lm_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+            max_tokens=160,
+        )
+        return resp.choices[0].message.content
+    except APIConnectionError:
+        return "ERROR: Could not connect to LM Studio. Make sure the LM Studio local server is running."
+    except APIError as e:
+        return f"ERROR: LM Studio API error: {e}"
+    except Exception as e:
+        return f"ERROR: Unexpected error while calling LM Studio: {e}"
 
 def main():
     if not CHUNKS_PATH.exists():

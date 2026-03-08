@@ -10,6 +10,8 @@ RAFT_PATH = PROJECT_ROOT / "data" / "raft" / "raft.jsonl"
 
 client = OpenAI()  # uses OPENAI_API_KEY
 
+random.seed(42)
+
 def load_chunks() -> List[dict]:
     chunks = []
     with CHUNKS_PATH.open("r", encoding="utf-8") as f:
@@ -36,10 +38,9 @@ You will see one ORACLE passage (contains the true answer) and 3 DISTRACTOR pass
 
 Task:
 1. Write ONE specific medical question that can ONLY be answered from the ORACLE passage.
-2. Write a detailed chain-of-thought explaining how you use the ORACLE to answer.
-3. Write a final short answer.
+2. Write one short grounded answer using only the ORACLE passage.
 
-Return JSON with keys: "question", "cot_answer", "final_answer".
+Return JSON with keys: "question", "final_answer".
 
 ORACLE:
 \"\"\"{oracle_text}\"\"\"
@@ -70,25 +71,30 @@ def main():
                 resp = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[{"role": "user", "content": prompt}],
-                    temperature=0.3,
+                    temperature=0.0,
                 )
                 content = resp.choices[0].message.content
                 try:
                     obj = json.loads(content)
                 except Exception:
-                    obj = {
-                        "question": "PARSING_ERROR",
-                        "cot_answer": content,
-                        "final_answer": "PARSING_ERROR",
-                    }
+                    print(f"⚠️ Skipped example {i+1} due to JSON parsing error")
+                    continue
+
+                question = obj.get("question", "").strip()
+                final_answer = obj.get("final_answer", "").strip()
+
+                if not question or not final_answer:
+                    print(f"⚠️ Skipped example {i+1} due to empty question/answer")
+                    continue
+
                 # Alpaca-style for Unsloth
                 rec = {
-                    "instruction": obj.get("question", ""),
+                    "instruction": question,
                     "input": "Context (oracle):\n"
                              + oracle["text"]
                              + "\n\nDistractors:\n"
                              + "\n\n---\n\n".join(d["text"] for d in distractors),
-                    "output": obj.get("cot_answer", "") + "\n\nFinal answer: " + obj.get("final_answer", ""),
+                    "output": final_answer,
                 }
                 fout.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 print(f"✅ Example {i+1}/{NUM}")
