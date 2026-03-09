@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 from openai import OpenAI
+from openai import APIConnectionError, APIError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 IN_PATH = PROJECT_ROOT / "data" / "eval" / "frozen_contexts.jsonl"
@@ -45,7 +46,7 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / f"lmstudio_{MODEL}.jsonl"
 
-    client = OpenAI(base_url=LMSTUDIO_BASE_URL, api_key="lm-studio")
+    client = OpenAI(base_url=LMSTUDIO_BASE_URL, api_key="lm-studio", timeout=60.0)
 
     with IN_PATH.open("r", encoding="utf-8") as f_in, out_path.open("w", encoding="utf-8") as f_out:
         for line in f_in:
@@ -55,12 +56,23 @@ def main() -> None:
             sources = row["sources"]
 
             prompt = build_prompt(question, sources)
-            resp = client.chat.completions.create(
-                model=MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=TEMP,
-            )
-            answer = resp.choices[0].message.content
+            try:
+                resp = client.chat.completions.create(
+                    model=MODEL,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=TEMP,
+                    max_tokens=160,
+                )
+                answer = resp.choices[0].message.content
+            except APIConnectionError:
+                print(f"⚠️ qid={qid} skipped: could not connect to LM Studio")
+                continue
+            except APIError as e:
+                print(f"⚠️ qid={qid} skipped: LM Studio API error: {e}")
+                continue
+            except Exception as e:
+                print(f"⚠️ qid={qid} skipped: unexpected error: {e}")
+                continue
 
             f_out.write(
                 json.dumps(
@@ -77,6 +89,7 @@ def main() -> None:
                 )
                 + "\n"
             )
+            f_out.flush()
             print(f"✅ qid={qid} done")
 
     print(f"\n✅ Wrote LM Studio outputs to: {out_path}")

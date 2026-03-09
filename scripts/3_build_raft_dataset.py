@@ -19,6 +19,42 @@ def load_chunks() -> List[dict]:
             chunks.append(json.loads(line))
     return chunks
 
+def is_good_oracle_chunk(chunk: dict) -> bool:
+    text = chunk["text"].lower().strip()
+
+    bad_patterns = [
+        "references",
+        "doi:",
+        " et al.",
+        "accessed ",
+        "isbn",
+        "all rights reserved",
+        "creative commons",
+        "guideline group",
+        "peer review",
+        "committee",
+        "chaired",
+        "level of evidence",
+        "recommended as of",
+    ]
+
+    if len(text) < 120:
+        return False
+
+    if any(p in text for p in bad_patterns):
+        return False
+
+    # Too table-heavy / formatting-heavy is usually poor for RAFT question generation
+    if text.count("|") > 12:
+        return False
+
+    # Too many URLs usually means reference/frontmatter content
+    if text.count("http") >= 2:
+        return False
+
+    return True
+
+
 def sample_examples(chunks: List[dict], num_examples: int = 50):
     examples = []
     for _ in range(num_examples):
@@ -56,12 +92,59 @@ DISTRACTORS:
 \"\"\"{distractors[2]}\"\"\"
 """
 
+def clean_json_text(content: str) -> str:
+    content = content.strip()
+    if content.startswith("```json"):
+        content = content[len("```json"):].strip()
+    elif content.startswith("```"):
+        content = content[len("```"):].strip()
+
+    if content.endswith("```"):
+        content = content[:-3].strip()
+
+    return content
+
+
+def is_good_generated_example(question: str, final_answer: str) -> bool:
+    q = question.lower().strip()
+    a = final_answer.lower().strip()
+
+    bad_question_patterns = [
+        "what is the focus of the article",
+        "who chaired",
+        "who published",
+        "what organization published",
+        "what was the comparison made",
+        "what are some complications",
+    ]
+
+    bad_answer_patterns = [
+        "as detailed in recommendation",
+        "see recommendation",
+        "the article focuses on",
+    ]
+
+    if len(q) < 20 or len(a) < 12:
+        return False
+
+    if any(p in q for p in bad_question_patterns):
+        return False
+
+    if any(p in a for p in bad_answer_patterns):
+        return False
+
+    return True
+
+
 def main():
     chunks = load_chunks()
     print(f"Loaded {len(chunks)} chunks")
 
+    filtered_chunks = [c for c in chunks if is_good_oracle_chunk(c)]
+    print(f"Usable oracle chunks after filtering: {len(filtered_chunks)}")
+
     NUM = 50  # reduce to 30 if needed for cost/time
-    examples = sample_examples(chunks, NUM)
+    examples = sample_examples(filtered_chunks, NUM)
 
     RAFT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with RAFT_PATH.open("w", encoding="utf-8") as fout:
@@ -75,7 +158,7 @@ def main():
                 )
                 content = resp.choices[0].message.content
                 try:
-                    obj = json.loads(content)
+                    obj = json.loads(clean_json_text(content))
                 except Exception:
                     print(f"⚠️ Skipped example {i+1} due to JSON parsing error")
                     continue
@@ -85,6 +168,10 @@ def main():
 
                 if not question or not final_answer:
                     print(f"⚠️ Skipped example {i+1} due to empty question/answer")
+                    continue
+
+                if not is_good_generated_example(question, final_answer):
+                    print(f"⚠️ Skipped example {i+1} due to weak generated QA")
                     continue
 
                 # Alpaca-style for Unsloth
