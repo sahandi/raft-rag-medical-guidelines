@@ -143,7 +143,7 @@ def main():
     filtered_chunks = [c for c in chunks if is_good_oracle_chunk(c)]
     print(f"Usable oracle chunks after filtering: {len(filtered_chunks)}")
 
-    NUM = 50  # reduce to 30 if needed for cost/time
+    NUM = 150  # larger pilot dataset
     examples = sample_examples(filtered_chunks, NUM)
 
     RAFT_PATH.parent.mkdir(parents=True, exist_ok=True)
