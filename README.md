@@ -1,86 +1,131 @@
 # RAFT + RAG on Medical Guidelines (Local, macOS)
 
-End-to-end **document RAG** over medical guideline PDFs (OCR → chunks → hybrid retrieval → cited answers), plus a **controlled evaluation harness** that compares systems using the **same frozen evidence** (frozen chunk IDs / contexts). RAFT fine-tuning is included as an experiment.
+Local document RAG over medical guideline PDFs using **OCR → Markdown → chunks → hybrid retrieval → grounded answers with citations**.
+
+This project also includes a **RAFT-style fine-tuning experiment** for a small local model. After rebuilding the RAFT dataset, retraining the model, and rerunning evaluation, the fine-tuned local model improved over the base local model in both **frozen-context** and **end-to-end RAG** evaluation.
 
 ## Demo (Streamlit)
 
-![Demo](docs/demo.gif?raw=1)
+![Demo](docs/demo.gif)
 
 Run:
+
 ```bash
 uv run streamlit run app.py
-```
+````
 
+What the demo shows:
 
-What you’ll see:
+* Ask a question about the indexed guideline PDFs
+* Retrieve evidence with hybrid search
+* Generate an answer from the retrieved chunks
+* Inspect source evidence with `pdf_name` and `chunk_id`
 
-* Ask a medical guideline question
-* The system retrieves evidence from indexed PDFs
-* The answer is generated from retrieved chunks
-* Sources appear as `pdf=` + `chunk_id=` citations
+---
 
-## Results (10-question internal eval, manually scored)
+## Results
 
-> These results come from a **small 10-question internal evaluation** under a specific local setup (LM Studio + hybrid retrieval for local models).  
-> Scores are useful for comparison, but they are **not a benchmark claim**. In spot-checks, failures can still occur (especially on table-heavy PDF chunks where PDF→Markdown extraction is noisy).
+> These results come from a **small 10-question internal evaluation** under this project’s local setup.
+> They are useful for comparing project variants, but they are **not a benchmark claim**.
 
-| System                                             | Correct | Grounded | Notes |
-| -------------------------------------------------- | ------: | -------: | ----- |
-| Base + RAG (local, hybrid retrieval; end-to-end)   |    9/10 |     9/10 | Strong baseline in this small eval |
-| RAFT + RAG (fine-tuned experiment; end-to-end)     |    2/10 |     3/10 | Underperformed in initial small run |
-| SOTA (OpenAI) on frozen contexts (controlled eval) |   10/10 |    10/10 | Same evidence (frozen contexts) for all answers |
+### Frozen-context evaluation
 
-Rubric:
+Same evidence is provided to each model. This isolates **generation quality / faithfulness** more than retrieval quality.
 
-* **Correct (0/1):** answers the question correctly
-* **Grounded (0/1):** answer is supported by the provided evidence and citations match
+| System           | Score | Notes                                                 |
+| ---------------- | ----: | ----------------------------------------------------- |
+| Base local model |  2/10 | Weak evidence-following on frozen contexts            |
+| RAFT local model |  5/10 | Improved over base after dataset rebuild + retraining |
+| GPT-4o-mini      |  9/10 | Strongest generation on the same evidence             |
 
-### Notes on evaluation setup
-- **Base + RAG / RAFT + RAG** rows are **end-to-end** (retrieval + generation).
-- **SOTA (OpenAI)** row is a **controlled generation comparison** on **frozen contexts** (same evidence chunks), which isolates answer faithfulness from retrieval differences.
+### End-to-end RAG evaluation
 
-## Docs
+Same project retriever, same 10-question set, but now the system must both **retrieve** and **generate**.
 
+| System                     | Score | Notes                                                                            |
+| -------------------------- | ----: | -------------------------------------------------------------------------------- |
+| Base + RAG                 |  5/10 | Stronger than frozen-context base score, but still limited                       |
+| RAFT + RAG                 |  6/10 | Improved over Base + RAG                                                         |
+| GPT + same retriever + RAG | 10/10 | Suggests the retriever is capable and the local generator is the main bottleneck |
+
+### Main takeaway
+
+* **RAFT improved over the base local model**
+* The improvement is **clearer in frozen-context evaluation**
+* The improvement is **smaller but still present in end-to-end RAG**
+* **GPT + the same retriever reached 10/10**, which suggests retrieval is reasonably strong and local generation quality is the main remaining bottleneck
+
+### Scoring rubric
+
+* **Correct (0/1):** the answer is factually correct for the question
+* **Grounded (0/1):** the answer is supported by the provided evidence and the cited sources match the claim
+
+---
+
+## Project components
+
+### Core pipeline
+
+* PDF ingestion with OCR when needed (`docling[ocr]`)
+* Markdown conversion
+* Chunk dataset generation (`data/chunks/chunks.jsonl`)
+* Hybrid retrieval:
+
+  * ChromaDB semantic search
+  * BM25 keyword search
+  * RRF fusion
+* Local inference through **LM Studio** (OpenAI-compatible server)
+* Streamlit demo app and CLI app
+* Controlled evaluation harness for frozen-context and end-to-end RAG comparison
+
+### RAFT experiment
+
+* RAFT-style training data built from oracle chunks + distractors
+* Dataset generation improved with:
+
+  * fenced JSON cleanup
+  * oracle chunk filtering
+  * generated QA filtering
+* Final cleaned RAFT dataset size: **135 rows**
+* Fine-tuned local model exported as GGUF and loaded in LM Studio
+
+---
+
+## Repository docs
+
+* Main project docs: `README.md`
 * Dataset notes: `data/README.md`
 * RAFT fine-tuning notes: `notebooks/README.md`
 
-## Key features
+---
 
-* PDF ingestion with OCR when needed (`docling[ocr]`)
-* Chunked corpus (`data/chunks/chunks.jsonl`)
-* Hybrid retrieval:
-
-  * ChromaDB (semantic)
-  * BM25 (keyword)
-  * RRF fusion for final top-k
-* Local inference via **LM Studio** (OpenAI-compatible server)
-* Evaluation harness:
-
-  * Freeze chunk IDs per question
-  * Build “frozen contexts”
-  * Run SOTA against the exact same evidence
+## Quickstart
 
 <details>
-  <summary><b>Quickstart</b></summary>
-
-### 1) Clone
+<summary><b>1) Clone the repo</b></summary>
 
 ```bash
 git clone https://github.com/sahandi/raft-rag-medical-guidelines.git
 cd raft-rag-medical-guidelines
 ```
 
-### 2) Setup
+</details>
+
+<details>
+<summary><b>2) Set up the environment</b></summary>
 
 ```bash
 ./scripts/initproject.sh
 ```
 
-### 3) Add PDFs
+</details>
 
-Put your guideline PDFs into:
+<details>
+<summary><b>3) Add PDFs</b></summary>
 
-```txt
+Put your medical guideline PDFs into:
+
+```text
 data/raw/
 ```
 
@@ -89,15 +134,21 @@ See:
 * `data/README.md`
 * `data/raw/manifest.csv`
 
-### 4) Build the pipeline
+</details>
+
+<details>
+<summary><b>4) Build the document pipeline</b></summary>
 
 ```bash
-uv run python scripts/1_ingest_pdfs.py
-uv run python scripts/2_make_chunks.py
-uv run python scripts/4_build_index.py
+uv run python scripts/ingest_pdfs.py
+uv run python scripts/make_chunks.py
+uv run python scripts/build_index.py
 ```
 
-### 5) Run the demo
+</details>
+
+<details>
+<summary><b>5) Run the Streamlit demo</b></summary>
 
 ```bash
 uv run streamlit run app.py
@@ -105,39 +156,56 @@ uv run streamlit run app.py
 
 </details>
 
+---
+
+## Pipeline scripts
+
+> If you kept your local rename commit, replace these filenames with the renamed versions in your branch.
+
+* `scripts/ingest_pdfs.py` — PDF → Markdown
+* `scripts/make_chunks.py` — Markdown → `data/chunks/chunks.jsonl`
+* `scripts/build_raft_dataset.py` — generate RAFT-style training data
+* `scripts/build_index.py` — build ChromaDB index
+* `scripts/rag_cli.py` — local CLI RAG demo
+* `scripts/build_frozen_contexts.py` — build frozen-context evaluation inputs
+* `scripts/run_openai_frozen_eval.py` — run OpenAI on frozen contexts
+* `scripts/run_lmstudio_frozen_eval.py` — run local LM Studio frozen-context evaluation
+* `scripts/run_openai_rag_e2e.py` — run end-to-end GPT RAG evaluation
+* `scripts/parse_rag_txt_to_jsonl.py` — standardize raw evaluation outputs into JSONL
+
+---
+
+## Run with LM Studio (local models)
+
 <details>
-  <summary><b>Pipeline scripts</b></summary>
-
-* `scripts/1_ingest_pdfs.py` — PDF → Markdown (Docling OCR when needed)
-* `scripts/2_make_chunks.py` — Markdown → `data/chunks/chunks.jsonl`
-* `scripts/4_build_index.py` — build ChromaDB index + export BM25 base texts
-* `scripts/5_rag_cli.py` — CLI demo (LM Studio)
-* `scripts/9_build_frozen_contexts.py` — build frozen contexts
-* `scripts/10_run_openai_sota.py` — run OpenAI model on frozen contexts
-
-</details>
-
-<details>
-  <summary><b>Run with LM Studio (local model)</b></summary>
-
-### 1) Start LM Studio server
+<summary><b>1) Start LM Studio server</b></summary>
 
 In LM Studio:
 
-1. Load a model (example: `Qwen2.5-0.5B-Instruct`)
-2. Enable **OpenAI-compatible server**
-3. Typical base URL:
+1. Load your local model
+2. Enable the **OpenAI-compatible server**
+3. Confirm the base URL is available, typically:
 
-   * `http://127.0.0.1:1234/v1`
-
-### 2) Run CLI demo
-
-```bash
-export LMSTUDIO_MODEL="qwen2.5-0.5b-instruct"
-uv run python scripts/5_rag_cli.py
+```text
+http://127.0.0.1:1234/v1
 ```
 
-### 3) Run Streamlit UI
+</details>
+
+<details>
+<summary><b>2) Run the CLI demo</b></summary>
+
+```bash
+export LMSTUDIO_MODEL="qwen2.5-0.5b-raft.gguf"
+uv run python scripts/rag_cli.py
+```
+
+You can also switch back to your base local model by changing `LMSTUDIO_MODEL`.
+
+</details>
+
+<details>
+<summary><b>3) Run the Streamlit UI</b></summary>
 
 ```bash
 uv run streamlit run app.py
@@ -145,55 +213,116 @@ uv run streamlit run app.py
 
 </details>
 
-<details>
-  <summary><b>Evaluation (frozen contexts + SOTA)</b></summary>
+---
 
-This evaluation is designed to be defensible:
+## Evaluation
 
-* Freeze which chunks are used per question (same evidence for all models)
-* Run multiple models against the exact same evidence
-* Score each answer: **Correct (0/1)** and **Grounded (0/1)**
+### Frozen-context evaluation
 
-### Inputs (committed)
+This controlled evaluation is designed to be more defensible:
 
-* Questions: `data/eval/raw/questions.txt`
-* Frozen chunk IDs: `data/eval/frozen_sources.jsonl`
+* Freeze which chunks are used per question
+* Provide the exact same evidence to multiple models
+* Compare answer quality on the same sources
 
-### Build frozen contexts (committed output)
+Inputs:
+
+* `data/eval/raw/questions.txt`
+* `data/eval/frozen_sources.jsonl`
+
+Build frozen contexts:
 
 ```bash
-uv run python scripts/9_build_frozen_contexts.py
+uv run python scripts/build_frozen_contexts.py
 ```
 
-Creates:
-
-* `data/eval/frozen_contexts.jsonl`
-
-### Run OpenAI on frozen contexts (SOTA baseline)
+Run OpenAI on frozen contexts:
 
 ```bash
 export OPENAI_API_KEY="YOUR_KEY"
 export OPENAI_MODEL="gpt-4o-mini"
-uv run python scripts/10_run_openai_sota.py
+uv run python scripts/run_openai_frozen_eval.py
 ```
 
-Output (ignored by git):
+Run local LM Studio frozen evaluation:
 
-* `data/eval/out/openai_<MODEL>.jsonl`
+```bash
+export LMSTUDIO_MODEL="qwen2.5-0.5b-raft.gguf"
+uv run python scripts/run_lmstudio_frozen_eval.py
+```
 
-</details>
+### End-to-end RAG evaluation
 
-<details>
-  <summary><b>Troubleshooting</b></summary>
+This evaluation uses the full project pipeline:
 
-* If answers vary across runs, reduce randomness by lowering generation temperature in `app.py`.
-* To wipe and rebuild the vector index, delete `chroma_db/` then re-run:
+* question
+* retrieval
+* grounded generation
+* scored output
 
-  ```bash
-  uv run python scripts/4_build_index.py
-  ```
-* If PDFs aren’t found, confirm they are in `data/raw/` (they are ignored by git on purpose).
-* If LM Studio connection fails, confirm the server is running at `http://127.0.0.1:1234/v1`.
+Run OpenAI end-to-end RAG evaluation:
 
-</details>
+```bash
+export OPENAI_API_KEY="YOUR_KEY"
+export OPENAI_MODEL="gpt-4o-mini"
+uv run python scripts/run_openai_rag_e2e.py
+```
 
+Standardized outputs are stored under:
+
+```text
+data/eval/out/
+```
+
+Current structure includes:
+
+* `frozen_context/base`
+* `frozen_context/raft`
+* `frozen_context/gpt`
+* `frozen_context/shared`
+* `end_to_end_rag/base_rag`
+* `end_to_end_rag/raft_rag`
+* `end_to_end_rag/gpt_rag`
+* `eval_summary.csv`
+
+---
+
+## Project structure
+
+```text
+app.py
+data/
+  raw/
+  markdown/
+  chunks/
+  raft/
+  eval/
+docs/
+notebooks/
+scripts/
+chroma_db/
+README.md
+```
+
+---
+
+## Troubleshooting
+
+* If LM Studio connection fails, confirm the local server is running at `http://127.0.0.1:1234/v1`
+* If answers vary too much, lower generation randomness in the app or evaluation scripts
+* If PDFs are not found, confirm they are inside `data/raw/`
+* If you want to rebuild the vector index, delete `chroma_db/` and rerun:
+
+```bash
+uv run python scripts/build_index.py
+```
+
+* If evaluation outputs look inconsistent, confirm the JSONL files under `data/eval/out/` were regenerated after the latest chunk / model changes
+
+---
+
+## Notes
+
+* This project is intended as a **portfolio / engineering project**, not a medical product
+* The evaluation set is intentionally small and manual
+* Table-heavy guideline PDFs can still introduce extraction noise during PDF → Markdown conversion
