@@ -12,7 +12,7 @@ Run:
 
 ```bash
 uv run streamlit run app.py
-````
+```
 
 What the demo shows:
 
@@ -42,11 +42,11 @@ Same evidence is provided to each model. This isolates **generation quality / fa
 
 Same project retriever, same 10-question set, but now the system must both **retrieve** and **generate**.
 
-| System                     | Score | Notes                                                                            |
-| -------------------------- | ----: | -------------------------------------------------------------------------------- |
-| Base + RAG                 |  5/10 | Stronger than frozen-context base score, but still limited                       |
-| RAFT + RAG                 |  6/10 | Improved over Base + RAG                                                         |
-| GPT + same retriever + RAG | 10/10 | Suggests the retriever is capable and the local generator is the main bottleneck |
+| System                       | Score | Notes                                                                            |
+| --------------------------   | ----: | -------------------------------------------------------------------------------- |
+| Base + RAG                   |  5/10 | Stronger than frozen-context base score, but still limited                       |
+| RAFT + RAG                   |  6/10 | Improved over Base + RAG                                                         |
+| GPT-4o-mini + same retriever | 10/10 | Suggests the retriever is capable and the local generator is the main bottleneck |
 
 ### Main takeaway
 
@@ -57,8 +57,10 @@ Same project retriever, same 10-question set, but now the system must both **ret
 
 ### Scoring rubric
 
-* **Correct (0/1):** the answer is factually correct for the question
-* **Grounded (0/1):** the answer is supported by the provided evidence and the cited sources match the claim
+* **Correctness:** the answer is factually correct for the question
+* **Grounding:** the answer is supported by the provided evidence and the cited sources match the claim
+
+For the summary tables above, a question counts as 1 point only if the answer is both correct and grounded. Totals are therefore reported out of 10.
 
 ---
 
@@ -96,6 +98,24 @@ Same project retriever, same 10-question set, but now the system must both **ret
 * Main project docs: `README.md`
 * Dataset notes: `data/README.md`
 * RAFT fine-tuning notes: `notebooks/README.md`
+
+---
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+* macOS
+
+* Git
+
+* Python
+
+* uv
+
+* LM Studio for local model inference
+
+* An OpenAI API key only if you want to run the OpenAI evaluation scripts
 
 ---
 
@@ -160,7 +180,6 @@ uv run streamlit run app.py
 
 ## Pipeline scripts
 
-> If you kept your local rename commit, replace these filenames with the renamed versions in your branch.
 
 * `scripts/ingest_pdfs.py` — PDF → Markdown
 * `scripts/make_chunks.py` — Markdown → `data/chunks/chunks.jsonl`
@@ -245,13 +264,13 @@ export OPENAI_MODEL="gpt-4o-mini"
 uv run python scripts/run_openai_frozen_eval.py
 ```
 
-Run local LM Studio frozen evaluation:
+Run local LM Studio frozen-context evaluation:
 
 ```bash
 export LMSTUDIO_MODEL="qwen2.5-0.5b-raft.gguf"
 uv run python scripts/run_lmstudio_frozen_eval.py
 ```
-<details>
+</details>
 
 <details>
 <summary><b>End-to-end RAG evaluation</b></summary>
@@ -270,6 +289,7 @@ export OPENAI_API_KEY="YOUR_KEY"
 export OPENAI_MODEL="gpt-4o-mini"
 uv run python scripts/run_openai_rag_e2e.py
 ```
+For the local Base + RAG and RAFT + RAG comparisons reported above, the same project RAG pipeline was run with the LM Studio model switched between the base checkpoint and the RAFT checkpoint, and the outputs were scored with the same 10-question rubric.
 
 Standardized outputs are stored under:
 
@@ -288,7 +308,7 @@ Current structure includes:
 * `end_to_end_rag/gpt_rag`
 * `eval_summary.csv`
 
-<details>
+</details>
 ---
 
 ## Project structure
