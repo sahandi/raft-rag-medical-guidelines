@@ -94,7 +94,7 @@ That metadata includes:
 
    ```bash
    uv run python scripts/build_raft_dataset.py
-````
+   ```
 
 2. Confirm the dataset exists locally:
 
