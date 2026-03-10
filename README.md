@@ -217,7 +217,8 @@ uv run streamlit run app.py
 
 ## Evaluation
 
-### Frozen-context evaluation
+<details>
+<summary><b>Frozen-context evaluation</b></summary>
 
 This controlled evaluation is designed to be more defensible:
 
@@ -250,8 +251,10 @@ Run local LM Studio frozen evaluation:
 export LMSTUDIO_MODEL="qwen2.5-0.5b-raft.gguf"
 uv run python scripts/run_lmstudio_frozen_eval.py
 ```
+<details>
 
-### End-to-end RAG evaluation
+<details>
+<summary><b>End-to-end RAG evaluation</b></summary>
 
 This evaluation uses the full project pipeline:
 
@@ -285,6 +288,7 @@ Current structure includes:
 * `end_to_end_rag/gpt_rag`
 * `eval_summary.csv`
 
+<details>
 ---
 
 ## Project structure
