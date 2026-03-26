@@ -69,3 +69,10 @@ backup.bundle
 
 # Local experiment outputs (do not commit)
 artifacts/
+
+# Allow files needed for Streamlit deployment
+!data/chunks/
+!data/chunks/chunks.jsonl
+!chroma_db/
+!chroma_db/**
+chroma_db/.DS_Store
